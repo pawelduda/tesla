@@ -77,6 +77,26 @@ defmodule Tesla.AdapterCase.Basic do
           assert args["user[age]"]  == "20"
         end
 
+        test "capturing query params from url/path" do
+          request = %Env{
+            method: :get,
+            url: "#{@url}/get?page=1&sort=desc&status[]=a&status[]=b&status[]=c&user[name]=Jon&user[age]=20"
+            # url: "#{@url}/get?page=1"
+          }
+
+          assert %Env{} = response = call(request)
+
+          response = Tesla.Middleware.JSON.decode(response, [])
+
+          query = response.query
+
+          assert query["page"] == "1"
+          assert query["sort"] == "desc"
+          # assert query["status[]"]   == ["a", "b", "c"]
+          assert query["user[name]"] == "Jon"
+          assert query["user[age]"]  == "20"
+        end
+
         test "autoredirects disabled by default" do
           request = %Env{
             method: :get,
